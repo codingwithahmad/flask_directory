@@ -6,6 +6,9 @@ from werkzeug.security import generate_password_hash
 
 
 class User(db.Model):
+
+    __tablename__ = "users"
+
     id = Column(Integer(), primary_key=True)
     username = Column(String(32), unique=True, nullable=False)
     password = Column(String(128), unique=False, nullable=False)
@@ -16,3 +19,10 @@ class User(db.Model):
             raise
 
         return generate_password_hash(value)
+
+    @validates('username')
+    def validation_username(self, key, value: str):
+        if value.isidentifier():
+            raise
+
+        return value
