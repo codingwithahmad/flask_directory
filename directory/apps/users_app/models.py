@@ -16,13 +16,13 @@ class User(db.Model):
     @validates('password')
     def validation_password(self, key, value):
         if len(value) < 6:
-            raise
+            raise ValueError('Password should be atleast 6 characters.')
 
         return generate_password_hash(value)
 
     @validates('username')
     def validation_username(self, key, value: str):
-        if value.isidentifier():
-            raise
+        if not value.isidentifier():
+            raise ValueError('Username is invalid.')
 
         return value
