@@ -22,7 +22,7 @@ def create_user():
         return {"Error": f'{e}' }, 400
     except IntegrityError as e:
         db.session.rollback()
-        return {"Error": "Username is duplicated."}
+        return {"Error": "Username is duplicated."}, 400
 
 
     return {"message": "Account created successfully."}, 201
