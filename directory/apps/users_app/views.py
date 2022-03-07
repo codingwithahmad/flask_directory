@@ -3,6 +3,7 @@ from flask import request
 from .models import User
 from directory import db
 from sqlalchemy.exc import IntegrityError
+from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 
 @users.route('/', methods=['POST'])
 def create_user():
@@ -26,3 +27,34 @@ def create_user():
 
 
     return {"message": "Account created successfully."}, 201
+
+@users.route('/auth/', methods=['POST'])
+def login():
+    if not request.is_json:
+        return {'error': 'JSON Only!'}, 400
+
+    args = request.get_json()
+
+    username = args.get('username')
+    password = args.get('password')
+
+    user = User.query.filter(User.username.ilike(username)).first()
+    if not user:
+        return {'Error': 'Username/Password dosn\'t match'}, 403
+
+    if not user.check_password(password):
+        return {'Error': 'Username/Password dosn\'t match'}, 403
+
+    access_token = create_access_token(identity=user.username, fresh=True)
+    refresh_token = create_refresh_token(identity=user.username)
+
+    return {'access': access_token, 'refresh_token': refresh_token}, 200
+
+
+@users.route('/', methods=['GET'])
+@jwt_required
+def get_user():
+    identity = get_jwt_identity()
+    user = User.query.filter(User.username.ilike(identity)).first()
+
+    return { 'username': user.username }
