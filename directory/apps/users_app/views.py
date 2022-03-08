@@ -3,7 +3,7 @@ from flask import request
 from .models import User
 from directory import db
 from sqlalchemy.exc import IntegrityError
-from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity, jwt_refresh_token_required
 
 @users.route('/', methods=['POST'])
 def create_user():
@@ -50,6 +50,11 @@ def login():
 
     return {'access': access_token, 'refresh_token': refresh_token}, 200
 
+@users.put('/auth/')
+@jwt_refresh_token_required
+def get_new_access_token():
+    identity = get_jwt_identity()
+    return {'access_token': create_access_token(identity=identity)}
 
 @users.route('/', methods=['GET'])
 @jwt_required
