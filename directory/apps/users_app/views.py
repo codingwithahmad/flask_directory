@@ -3,7 +3,7 @@ from flask import request
 from .models import User
 from directory import db
 from sqlalchemy.exc import IntegrityError
-from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity, jwt_refresh_token_required
+from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 from directory.utils.request import json_only
 
 @users.route('/', methods=['POST'])
@@ -44,20 +44,20 @@ def login():
 
     if not user.check_password(password):
         return {'Error': 'Username/Password dosn\'t match'}, 403
-
+    print(user.username)
     access_token = create_access_token(identity=user.username, fresh=True)
     refresh_token = create_refresh_token(identity=user.username)
 
     return {'access': access_token, 'refresh_token': refresh_token}, 200
 
 @users.put('/auth/')
-@jwt_refresh_token_required
+@jwt_required(refresh=True)
 def get_new_access_token():
     identity = get_jwt_identity()
     return {'access_token': create_access_token(identity=identity)}
 
 @users.route('/', methods=['GET'])
-@jwt_required
+@jwt_required()
 def get_user():
     identity = get_jwt_identity()
     user = User.query.filter(User.username.ilike(identity)).first()
