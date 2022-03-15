@@ -67,3 +67,14 @@ def modify_thumbnail(site_id):
     site.icon = file_name
     db.session.commit()
     return {}, 204
+
+@sites.route('/<int:site_id>/', methods=['DELETE'])
+@jwt_required()
+def delete_site(site_id):
+    site = Site.query.get(site_id)
+    if not site:
+        return {'error': 'Site with given ID not found!'}, 404
+
+    db.session.delete(site)
+    db.session.commit()
+    return {}, 204
