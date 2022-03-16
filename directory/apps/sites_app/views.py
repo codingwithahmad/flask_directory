@@ -78,3 +78,22 @@ def delete_site(site_id):
     db.session.delete(site)
     db.session.commit()
     return {}, 204
+
+@sites.route('/<int:site_id>/', methods=['PATCH'])
+@jwt_required()
+@json_only
+def modify_site(site_id):
+    args = request.get_json()
+    site = Site.query.get(site_id)
+    if not site:
+        return {'error': 'Site with given ID not found!'}, 404
+    try:
+        site.name = args.get('name') if args.get('name') else site.name
+        site.description = args.get('description') if args.get('description') else site.description
+        site.address = args.get('address') if args.get('address') else site.address
+        db.session.commit()
+    except ValueError as e:
+        db.session.rollback()
+        return {'error': f"{e}"}, 400
+
+    return {}, 204
